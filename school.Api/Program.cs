@@ -10,64 +10,32 @@ using school.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ---------------------------------------------------------
+// ----------------------------
 // DATABASE
-// ---------------------------------------------------------
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        new MySqlServerVersion(new Version(8, 0, 43))
-    )
-);
+// ----------------------------
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+                       ?? "Server=localhost;Port=3306;Database=SchoolDataBase;User=root;Password=1234";
 
-// ---------------------------------------------------------
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 43))));
+
+// ----------------------------
 // DEPENDENCY INJECTION
-// ---------------------------------------------------------
+// ----------------------------
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
-
 builder.Services.AddScoped<IAuthService, AuthService>();
-
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IStudentService, StudentService>();
-
 builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
 
-// ---------------------------------------------------------
-// CONTROLLERS + SWAGGER
-// ---------------------------------------------------------
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// ---------------------------------------------------------
-// CORS ABIERTO
-// ---------------------------------------------------------
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll",
-        builder =>
-        {
-            builder
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader();
-        });
-});
-
-// ---------------------------------------------------------
-// JWT CONFIG (Render requiere Jwt__Key en variables de entorno)
-// ---------------------------------------------------------
-//var jwtKey = builder.Configuration["Jwt:Key"];
-var jwtKey = builder.Configuration["Jwt:Key"] 
-             ?? "LlavePorDefectoSuperSegura1234567890!";
-
-var jwtIssuer = builder.Configuration["Jwt:Issuer"];
-var jwtAudience = builder.Configuration["Jwt:Audience"];
-
-if (string.IsNullOrEmpty(jwtKey))
-    throw new Exception("Falta la variable Jwt__Key en Render.");
+// ----------------------------
+// JWT
+// ----------------------------
+var jwtKey = builder.Configuration["Jwt:Key"] ?? "LlavePorDefectoSuperSegura1234567890!";
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "SchoolApiDefault";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "SchoolApiUsersDefault";
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -80,41 +48,49 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtKey)
-            )
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
         };
     });
 
-// ---------------------------------------------------------
-// BUILD APP
-// ---------------------------------------------------------
+// ----------------------------
+// CORS
+// ----------------------------
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+// ----------------------------
+// Controllers + Swagger
+// ----------------------------
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
-// ---------------------------------------------------------
-// SWAGGER (solo en desarrollo)
-// ---------------------------------------------------------
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-// ---------------------------------------------------------
-// CORS (antes de auth)
-// ---------------------------------------------------------
-app.UseCors("AllowAll");
-
-// ---------------------------------------------------------
-// HTTPS solo local, Render usa HTTP internamente
-// ---------------------------------------------------------
-if (app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
-
+// ----------------------------
+// Middleware
+// ----------------------------
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Endpoint raíz para probar
+app.MapGet("/", () => Results.Ok(new { message = "API corriendo correctamente" }));
+
+// Swagger en producción
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "School API V1");
+    c.RoutePrefix = "swagger"; // acceder con /swagger
+});
 
 app.MapControllers();
 
