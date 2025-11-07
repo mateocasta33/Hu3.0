@@ -23,6 +23,7 @@ namespace school.Api.Controllers
             return Ok(new { user });
         }
 
+        
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
