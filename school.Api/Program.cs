@@ -59,7 +59,10 @@ builder.Services.AddCors(options =>
 // ---------------------------------------------------------
 // JWT CONFIG (Render requiere Jwt__Key en variables de entorno)
 // ---------------------------------------------------------
-var jwtKey = builder.Configuration["Jwt:Key"];
+//var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtKey = builder.Configuration["Jwt:Key"] 
+             ?? "LlavePorDefectoSuperSegura1234567890!";
+
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
 
