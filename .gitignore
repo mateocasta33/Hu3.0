@@ -1,0 +1,75 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Build results
+[Bb]in/
+[Oo]bj/
+
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.env
+school.Api/appsettings.json
+
+# User-specific files (MonoDevelop/Xamarin Studio)
+*.userprefs
+
+# Mono auto generated files
+mono_crash.*
+
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio 2015/2017 cache/options directory
+.vs/
+.idea/
+
+# Rider
+.idea/.idea.HU3/.idea/workspace.xml
+.idea/.idea.HU3/.idea/shelf
+
+# Packages
+*.nupkg
+*.snupkg
+*.swp
+*.bak
+*.tmp
+*.log
+
+# Test Results
+TestResults/
+*.trx
+
+# User-specific files
+appsettings.Development.json
+secrets.json
+
+# Dotnet tools
+project.lock.json
+project.assets.json
+
+# ReSharper is a common Rider/VS extension
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# Publish output
+publish/

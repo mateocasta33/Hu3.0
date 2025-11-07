@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  school-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: school-api-backend
+    ports:
+      - "5000:8080"
+    env_file:
+      - .env
+    restart: unless-stopped
